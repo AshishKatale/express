@@ -106,7 +106,6 @@ int tokenize(Lexer *lex, TokenArray *tokens) {
   while (1) {
     Token tok = next_token(lex);
     if (tok.type == TOKEN_ILLEGAL) {
-      token_array_free(tokens);
       int idx = lex->cur_pos - lex->expr_str;
       printf("\nERROR TOKENIZING:\n");
       printf("%s\n", lex->expr_str);

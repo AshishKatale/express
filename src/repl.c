@@ -13,13 +13,17 @@
 static const CmdInfo cmds[] = {
     {.cmd = CMD_QUIT, .cmd_str = "\\q", .cmd_help = "quit this repl"},
     {.cmd = CMD_HELP, .cmd_str = "\\h", .cmd_help = "show this help message"},
+    {.cmd = CMD_RESULT, .cmd_str = "\\r", .cmd_help = "toggle show result"},
+    {.cmd = CMD_AST, .cmd_str = "\\a", .cmd_help = "toggle show AST"},
+    {.cmd = CMD_TOKEN,
+     .cmd_str = "\\l",
+     .cmd_help = "toggle show lexer tokens"},
 };
 
-void print_help() {
-  printf("\033[33;1;1mUsage:\033[0m\n");
+void print_repl_help() {
+  printf("Usage:\n");
   for (int i = 0; i < (int)(sizeof(cmds) / sizeof(cmds[0])); ++i) {
-    printf("  \033[34;1;1m%s\033[0m     %s\n", cmds[i].cmd_str,
-           cmds[i].cmd_help);
+    printf("    %s     %s\n", cmds[i].cmd_str, cmds[i].cmd_help);
   }
 }
 
@@ -37,7 +41,7 @@ CMD check_slash_cmd(char *cmd) {
   return CMD_INVALID;
 }
 
-int parse_and_eval_expression(char *expr_str) {
+int parse_and_eval_expression(char *expr_str, int flags) {
   if (*expr_str == '\0') {
     printf("ERROR: empty expression\n");
     return 1;
@@ -45,24 +49,32 @@ int parse_and_eval_expression(char *expr_str) {
 
   Lexer lexer = {.expr_str = expr_str, .cur_pos = expr_str};
   TokenArray *tokens = token_array_init();
-  tokenize(&lexer, tokens);
-  if (!tokens) {
+  int failed = tokenize(&lexer, tokens);
+  if (failed) {
+    token_array_free(tokens);
     return 1;
   }
-  printf("\n");
-  token_array_print(tokens);
+  if ((flags & FLAG_TOKENS) == FLAG_TOKENS) {
+    printf("\n");
+    token_array_print(tokens);
+  }
 
   ExprArena *expr_arena = expr_arena_init();
   Parser parser = {.token_array = tokens, .expr_arena = expr_arena, .index = 0};
   int expr_idx = parse(&parser);
   if (expr_idx < 0) {
+    expr_arena_free(expr_arena);
     return 1;
   }
-  printf("\nAST:");
-  print_expr(expr_arena, expr_idx);
+  if ((flags & FLAG_AST) == FLAG_AST) {
+    printf("\nAST:");
+    print_expr(expr_arena, expr_idx);
+  }
 
   double result = evaluate_expr(expr_arena, expr_idx);
-  printf("\nResult:\n%s = %lf\n", expr_str, result);
+  if ((flags & FLAG_RESULT) == FLAG_RESULT) {
+    printf("%s = %lf\n", expr_str, result);
+  }
 
   token_array_free(tokens);
   expr_arena_free(expr_arena);
@@ -70,10 +82,11 @@ int parse_and_eval_expression(char *expr_str) {
 }
 
 void start_repl() {
-  print_help();
+  print_repl_help();
 
   char *line;
-  char *prompt = "\n\033[36;1;1mexpression\033[32;1;1m >>\033[0m ";
+  char *prompt = "\nexpression >> ";
+  int flags = FLAG_RESULT;
   while ((line = readline(prompt)) != NULL) {
     if (*line) {
       add_history(line);
@@ -87,19 +100,31 @@ void start_repl() {
     CMD cmd = check_slash_cmd(line_ws_trimmed);
     if (cmd == CMD_INVALID) {
       printf("ERROR: invalid command '%s'\n", line_ws_trimmed);
-      print_help();
+      print_repl_help();
       free(line);
       continue;
     } else if (cmd == CMD_HELP) {
-      print_help();
+      print_repl_help();
       free(line);
       continue;
     } else if (cmd == CMD_QUIT) {
       free(line);
       break;
+    } else if (cmd == CMD_RESULT) {
+      flags ^= FLAG_RESULT;
+      printf("Show result: %s\n", (flags & FLAG_RESULT) > 0 ? "on" : "off");
+      continue;
+    } else if (cmd == CMD_TOKEN) {
+      flags ^= FLAG_TOKENS;
+      printf("Show tokens: %s\n", (flags & FLAG_TOKENS) > 0 ? "on" : "off");
+      continue;
+    } else if (cmd == CMD_AST) {
+      flags ^= FLAG_AST;
+      printf("Show AST: %s\n", (flags & FLAG_AST) > 0 ? "on" : "off");
+      continue;
     }
 
-    parse_and_eval_expression(line_ws_trimmed);
+    parse_and_eval_expression(line_ws_trimmed, flags);
 
     free(line);
   }
