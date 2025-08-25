@@ -23,10 +23,9 @@ typedef struct {
 } CmdInfo;
 
 CMD check_slash_cmd(char *);
-int parse_and_eval(char *expr_str, double *, ExprArena *, int *, TokenArray *);
 int parse_and_eval_expression(char *, int);
-int eval_expression(char *);
-void print_help();
+void print_repl_help();
 void start_repl();
+void repl_free();
 
 #endif // !REPL_H

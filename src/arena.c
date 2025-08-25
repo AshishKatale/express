@@ -6,14 +6,14 @@
 #include "parser.h"
 
 TokenArray *token_array_init() {
-  Token *data = calloc(16, sizeof(Token));
-  TokenArray *arr = malloc(sizeof(TokenArray));
+  Token *tokens = calloc(16, sizeof(Token));
+  TokenArray *token_array = malloc(sizeof(TokenArray));
 
-  arr->tokens = data;
-  arr->capacity = 16;
-  arr->count = 0;
+  token_array->tokens = tokens;
+  token_array->capacity = 16;
+  token_array->count = 0;
 
-  return arr;
+  return token_array;
 }
 
 void token_array_append(TokenArray *arr, Token t) {
@@ -26,6 +26,10 @@ void token_array_append(TokenArray *arr, Token t) {
     }
   }
   arr->tokens[arr->count++] = t;
+}
+
+void token_array_reset(TokenArray *err) {
+  err->count = 0;
 }
 
 void token_array_free(TokenArray *arr) {
@@ -42,10 +46,10 @@ void token_array_print(TokenArray *arr) {
 }
 
 ExprArena *expr_arena_init() {
-  Expr *data = calloc(16, sizeof(Expr));
+  Expr *exprs = calloc(16, sizeof(Expr));
   ExprArena *expr_arena = malloc(sizeof(ExprArena));
 
-  expr_arena->exprs = data;
+  expr_arena->exprs = exprs;
   expr_arena->capacity = 16;
   expr_arena->count = 0;
 
@@ -68,6 +72,10 @@ int expr_arena_alloc(ExprArena *expr_arena) {
 
 Expr *expr_arena_get(ExprArena *expr_arena, int idx) {
   return expr_arena->exprs + idx;
+}
+
+void expr_arena_reset(ExprArena *expr_arena) {
+  expr_arena->count = 0;
 }
 
 void expr_arena_free(ExprArena *expr_arena) {

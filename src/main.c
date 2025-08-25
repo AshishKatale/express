@@ -53,5 +53,7 @@ int main(int argc, char *argv[]) {
   }
 
   flags |= FLAG_RESULT;
-  return parse_and_eval_expression(argv[argc - 1], flags);
+  int exit = parse_and_eval_expression(argv[argc - 1], flags);
+  repl_free();
+  return exit;
 }

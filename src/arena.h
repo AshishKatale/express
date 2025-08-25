@@ -17,11 +17,13 @@ typedef struct ExprArena {
 
 TokenArray *token_array_init();
 void token_array_append(TokenArray *, Token);
+void token_array_reset(TokenArray *);
 void token_array_free(TokenArray *);
 void token_array_print(TokenArray *);
 
 ExprArena *expr_arena_init();
 int expr_arena_alloc(ExprArena *);
+void expr_arena_reset(ExprArena *);
 void expr_arena_free(ExprArena *);
 struct Expr *expr_arena_get(ExprArena *, int);
 

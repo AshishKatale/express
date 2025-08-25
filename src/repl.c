@@ -10,6 +10,16 @@
 #include "parser.h"
 #include "repl.h"
 
+static ExprArena *expr_arena = NULL;
+static TokenArray *token_array = NULL;
+
+void repl_free() {
+  if (token_array)
+    token_array_free(token_array);
+  if (expr_arena)
+    expr_arena_free(expr_arena);
+}
+
 static const CmdInfo cmds[] = {
     {.cmd = CMD_QUIT, .cmd_str = "\\q", .cmd_help = "quit this repl"},
     {.cmd = CMD_HELP, .cmd_str = "\\h", .cmd_help = "show this help message"},
@@ -48,22 +58,28 @@ int parse_and_eval_expression(char *expr_str, int flags) {
   }
 
   Lexer lexer = {.expr_str = expr_str, .cur_pos = expr_str};
-  TokenArray *tokens = token_array_init();
-  int failed = tokenize(&lexer, tokens);
+  if (!token_array) {
+    token_array = token_array_init();
+  }
+  int failed = tokenize(&lexer, token_array);
   if (failed) {
-    token_array_free(tokens);
+    token_array_reset(token_array);
     return 1;
   }
   if ((flags & FLAG_TOKENS) == FLAG_TOKENS) {
     printf("\n");
-    token_array_print(tokens);
+    token_array_print(token_array);
   }
 
-  ExprArena *expr_arena = expr_arena_init();
-  Parser parser = {.token_array = tokens, .expr_arena = expr_arena, .idx = 0};
+  if (!expr_arena) {
+    expr_arena = expr_arena_init();
+  }
+  Parser parser = {
+      .token_array = token_array, .expr_arena = expr_arena, .idx = 0};
   int expr_idx = parse(&parser);
   if (expr_idx < 0) {
-    expr_arena_free(expr_arena);
+    token_array_reset(token_array);
+    expr_arena_reset(expr_arena);
     return 1;
   }
   if ((flags & FLAG_AST) == FLAG_AST) {
@@ -76,8 +92,8 @@ int parse_and_eval_expression(char *expr_str, int flags) {
     printf("%s = %lf\n", expr_str, result);
   }
 
-  token_array_free(tokens);
-  expr_arena_free(expr_arena);
+  token_array_reset(token_array);
+  expr_arena_reset(expr_arena);
   return 0;
 }
 
@@ -129,5 +145,6 @@ void start_repl() {
     free(line);
   }
 
+  repl_free();
   clear_history();
 }
