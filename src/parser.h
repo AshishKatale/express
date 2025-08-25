@@ -46,7 +46,7 @@ typedef enum ExprType { EXPR_BINARY, EXPR_NUMERIC, EXPR_UNARY } ExprType;
 typedef struct Parser {
   ExprArena *expr_arena;
   TokenArray *token_array;
-  int index;
+  int idx;
 } Parser;
 
 typedef struct Expr Expr;

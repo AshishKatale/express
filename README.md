@@ -20,7 +20,7 @@ $ ./express '4 + 3 * 11 - 13 % (-4) ^ 2'
 ```
 
 
-> #### Show AST (Abstract Synatx Tree) an expression
+> #### Show AST (Abstract Synatx Tree) for expression
 
 
 ```bash

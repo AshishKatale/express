@@ -60,7 +60,7 @@ int parse_and_eval_expression(char *expr_str, int flags) {
   }
 
   ExprArena *expr_arena = expr_arena_init();
-  Parser parser = {.token_array = tokens, .expr_arena = expr_arena, .index = 0};
+  Parser parser = {.token_array = tokens, .expr_arena = expr_arena, .idx = 0};
   int expr_idx = parse(&parser);
   if (expr_idx < 0) {
     expr_arena_free(expr_arena);

@@ -84,7 +84,7 @@ void _print_expr_helper(ExprArena *expr_arena, int expr_idx, int i) {
 }
 
 Token *expect_token(Parser *parser, TokenType type) {
-  Token *tok = &parser->token_array->tokens[parser->index];
+  Token *tok = &parser->token_array->tokens[parser->idx];
   if (tok->type != type) {
     print_error(parser, tok->pos, "Unexpected token");
     return NULL;
@@ -93,11 +93,11 @@ Token *expect_token(Parser *parser, TokenType type) {
 }
 
 Token *peek_next_token(Parser *parser) {
-  return &parser->token_array->tokens[parser->index];
+  return &parser->token_array->tokens[parser->idx];
 }
 
 Token *pop_next_token(Parser *parser) {
-  return &parser->token_array->tokens[parser->index++];
+  return &parser->token_array->tokens[parser->idx++];
 }
 
 int get_binding_priorities(TokenType type, int *op, int *lbp, int *rbp) {
