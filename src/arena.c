@@ -28,8 +28,8 @@ void token_array_append(TokenArray *arr, Token t) {
   arr->tokens[arr->count++] = t;
 }
 
-void token_array_reset(TokenArray *err) {
-  err->count = 0;
+void token_array_reset(TokenArray *arr) {
+  arr->count = 0;
 }
 
 void token_array_free(TokenArray *arr) {
