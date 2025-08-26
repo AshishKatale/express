@@ -6,7 +6,7 @@
 #define INDENT_SIZE 7
 
 int get_precision();
-void set_precision(char *p);
+void set_precision(const char *p);
 
 #define BINOP_LIST                                                             \
   X(ADD)                                                                       \

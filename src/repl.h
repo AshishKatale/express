@@ -11,6 +11,7 @@ typedef enum {
   CMD_INVALID,
   CMD_QUIT,
   CMD_HELP,
+  CMD_PRECISION,
   CMD_RESULT,
   CMD_TOKEN,
   CMD_AST,
@@ -22,10 +23,15 @@ typedef struct {
   const char *cmd_help;
 } CmdInfo;
 
-CMD check_slash_cmd(char *);
+typedef struct {
+  CMD cmd;
+  const char *cmd_args;
+} Command;
+
 int parse_and_eval_expression(char *, int);
-void print_repl_help();
-void start_repl();
+Command repl_check_slash_cmd(char *);
+void repl_print_help();
+void repl_start();
 void repl_free();
 
 #endif // !REPL_H

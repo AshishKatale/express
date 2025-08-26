@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   while ((opt = getopt(argc, argv, "hialtp:")) != -1) {
     switch (opt) {
     case 'i':
-      start_repl();
+      repl_start();
       return 0;
     case 'h':
       print_cli_help(stdout);

@@ -7,7 +7,10 @@
 
 int global_precision = 1;
 int get_precision() { return global_precision; }
-void set_precision(char *p) { global_precision = atoi(p); }
+void set_precision(const char *prec) {
+  int p = atoi(prec);
+  global_precision = p < 1 ? 0 : p;
+}
 
 const char *binary_operator_name(BinOp o) {
   switch (o) {

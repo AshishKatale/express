@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <readline/history.h>
 #include <readline/readline.h>
@@ -20,35 +19,47 @@ void repl_free() {
     expr_arena_free(expr_arena);
 }
 
-static const CmdInfo cmds[] = {
-    {.cmd = CMD_QUIT, .cmd_str = "\\q", .cmd_help = "quit this repl"},
-    {.cmd = CMD_HELP, .cmd_str = "\\h", .cmd_help = "show this help message"},
-    {.cmd = CMD_RESULT, .cmd_str = "\\r", .cmd_help = "toggle show result"},
-    {.cmd = CMD_AST, .cmd_str = "\\a", .cmd_help = "toggle show AST"},
-    {.cmd = CMD_TOKEN,
-     .cmd_str = "\\l",
-     .cmd_help = "toggle show lexer tokens"},
+static const CmdInfo cmd_lookup[] = {
+    {.cmd = CMD_HELP, .cmd_str = "?", .cmd_help = "show this help message"},
+    {.cmd = CMD_HELP, .cmd_str = "h", .cmd_help = "alternative to \\?"},
+    {.cmd = CMD_QUIT, .cmd_str = "q", .cmd_help = "quit this repl"},
+    {.cmd = CMD_RESULT, .cmd_str = "r", .cmd_help = "toggle show result"},
+    {.cmd = CMD_AST, .cmd_str = "a", .cmd_help = "toggle show AST"},
+    {.cmd = CMD_TOKEN, .cmd_str = "l", .cmd_help = "toggle show lexer tokens"},
+    {.cmd = CMD_PRECISION,
+     .cmd_str = "p",
+     .cmd_help = "set precision for numbers"},
 };
 
-void print_repl_help() {
+void repl_print_help() {
   printf("Usage:\n");
-  for (int i = 0; i < (int)(sizeof(cmds) / sizeof(cmds[0])); ++i) {
-    printf("    %s     %s\n", cmds[i].cmd_str, cmds[i].cmd_help);
+  for (int i = 0; i < (int)(sizeof(cmd_lookup) / sizeof(cmd_lookup[0])); ++i) {
+    printf("    \\%s     %s\n", cmd_lookup[i].cmd_str, cmd_lookup[i].cmd_help);
   }
 }
 
-CMD check_slash_cmd(char *cmd) {
-  if (*cmd != '\\') {
-    return CMD_NONE;
+Command repl_check_slash_cmd(char *cmd_str) {
+  Command c;
+  if (*cmd_str != '\\') {
+    c.cmd = CMD_NONE;
+    return c;
   }
 
-  for (int i = 0; i < (int)(sizeof(cmds) / sizeof(cmds[0])); ++i) {
-    if (strcmp(cmds[i].cmd_str, cmd) == 0) {
-      return cmds[i].cmd;
+  cmd_str++; // skip '\'
+  for (int i = 0; i < (int)(sizeof(cmd_lookup) / sizeof(cmd_lookup[0])); ++i) {
+    if (*cmd_str == *cmd_lookup[i].cmd_str) {
+      cmd_str++; // skip cmd letter
+      while (*cmd_str == ' ' || *cmd_str == '\t') {
+        cmd_str++; // skip whitespace after cmd and before args
+      }
+      c.cmd = cmd_lookup[i].cmd;
+      c.cmd_args = cmd_str;
+      return c;
     }
   }
 
-  return CMD_INVALID;
+  c.cmd = CMD_INVALID;
+  return c;
 }
 
 int parse_and_eval_expression(char *expr_str, int flags) {
@@ -97,8 +108,8 @@ int parse_and_eval_expression(char *expr_str, int flags) {
   return 0;
 }
 
-void start_repl() {
-  print_repl_help();
+void repl_start() {
+  repl_print_help();
 
   char *line;
   char *prompt = "\nexpression >> ";
@@ -113,28 +124,32 @@ void start_repl() {
       line_ws_trimmed++;
     }
 
-    CMD cmd = check_slash_cmd(line_ws_trimmed);
-    if (cmd == CMD_INVALID) {
+    Command command = repl_check_slash_cmd(line_ws_trimmed);
+    if (command.cmd == CMD_INVALID) {
       printf("ERROR: invalid command '%s'\n", line_ws_trimmed);
-      print_repl_help();
       free(line);
       continue;
-    } else if (cmd == CMD_HELP) {
-      print_repl_help();
+    } else if (command.cmd == CMD_HELP) {
+      repl_print_help();
       free(line);
       continue;
-    } else if (cmd == CMD_QUIT) {
+    } else if (command.cmd == CMD_PRECISION) {
+      set_precision(command.cmd_args);
+      printf("Precision set: %d\n", get_precision());
+      free(line);
+      continue;
+    } else if (command.cmd == CMD_QUIT) {
       free(line);
       break;
-    } else if (cmd == CMD_RESULT) {
+    } else if (command.cmd == CMD_RESULT) {
       flags ^= FLAG_RESULT;
       printf("Show result: %s\n", (flags & FLAG_RESULT) > 0 ? "on" : "off");
       continue;
-    } else if (cmd == CMD_TOKEN) {
+    } else if (command.cmd == CMD_TOKEN) {
       flags ^= FLAG_TOKENS;
       printf("Show tokens: %s\n", (flags & FLAG_TOKENS) > 0 ? "on" : "off");
       continue;
-    } else if (cmd == CMD_AST) {
+    } else if (command.cmd == CMD_AST) {
       flags ^= FLAG_AST;
       printf("Show AST: %s\n", (flags & FLAG_AST) > 0 ? "on" : "off");
       continue;
