@@ -4,10 +4,11 @@
 ```bash
 $ ./express -h
 Usage:
-    -h        show this help message
-    -i        start interactive repl mode
-    -t  -l    show lexer tokens
-    -a        show ast for expression
+    -h          show this help message
+    -p <num>    set precision for output numbers
+    -i          start interactive repl mode
+    -t / -l     show lexer tokens
+    -a          show ast for expression
 ```
 
 
@@ -16,7 +17,16 @@ Usage:
 
 ```bash
 $ ./express '4 + 3 * 11 - 13 % (-4) ^ 2'
-4 + 3 * 11 - 13 % (-4) ^ 2 = 24.000000
+4 + 3 * 11 - 13 % (-4) ^ 2 = 24.0
+```
+
+
+> #### Set precision for result
+
+
+```bash
+$ ./express -p 3 '4 + 3 * 11 - 13 % (-4) ^ 2'
+4 + 3 * 11 - 13 % (-4) ^ 2 = 24.000
 ```
 
 
@@ -29,29 +39,29 @@ $ ./express -a '4 + 3 * 11 - 13 % (-4) ^ 2'
 AST:
 Binary(
        Binary(
-              Numeric(4.000000),
+              Numeric(4.0),
               ADD,
               Binary(
-                     Numeric(3.000000),
+                     Numeric(3.0),
                      MUL,
-                     Numeric(11.000000)
+                     Numeric(11.0)
               )
        ),
        SUB,
        Binary(
-              Numeric(13.000000),
+              Numeric(13.0),
               MOD,
               Binary(
                      Unary(
                             NEGATIVE,
-                            Numeric(4.000000)
+                            Numeric(4.0)
                      ),
                      POW,
-                     Numeric(2.000000)
+                     Numeric(2.0)
               )
        )
 )
-4 + 3 * 11 - 13 % (-4) ^ 2 = 24.000000
+4 + 3 * 11 - 13 % (-4) ^ 2 = 24.0
 ```
 
 
@@ -78,7 +88,7 @@ Tokens [15]: [
     Token { type=NUM, token='2' }
     Token { type=EOF, token='' }
 ]
-4 + 3 * 11 - 13 % (-4) ^ 2 = 24.000000
+4 + 3 * 11 - 13 % (-4) ^ 2 = 24.0
 ```
 
 
@@ -88,14 +98,16 @@ Tokens [15]: [
 ```bash
 $ ./express -i
 Usage:
+    \?     show this help message
+    \h     alternative to \?
     \q     quit this repl
-    \h     show this help message
     \r     toggle show result
     \a     toggle show AST
     \l     toggle show lexer tokens
+    \p     set precision for numbers
 
 expression >> 1 + 3
-1 + 3 = 4.000000
+1 + 3 = 4.0
 
 expression >> \a
 Show AST: on
@@ -104,11 +116,24 @@ expression >> 1 + 3
 
 AST:
 Binary(
-       Numeric(1.000000),
+       Numeric(1.0),
        ADD,
-       Numeric(3.000000)
+       Numeric(3.0)
 )
-1 + 3 = 4.000000
+1 + 3 = 4.0
+
+expression >> \p 4
+Precision set: 4
+
+expression >> 1 + 3
+
+AST:
+Binary(
+       Numeric(1.0000),
+       ADD,
+       Numeric(3.0000)
+)
+1 + 3 = 4.0000
 
 expression >>
 
