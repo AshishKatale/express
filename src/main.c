@@ -2,14 +2,16 @@
 #include <unistd.h>
 
 #include "arena.h"
+#include "parser.h"
 #include "repl.h"
 
 void print_cli_help(FILE *output_fd) {
   char *help_msg = "Usage:"
-                   "\n    -h        show this help message"
-                   "\n    -i        start interactive repl mode"
-                   "\n    -t  -l    show lexer tokens"
-                   "\n    -a        show ast for expression\n";
+                   "\n    -h          show this help message"
+                   "\n    -p <num>    set precision for output numbers"
+                   "\n    -i          start interactive repl mode"
+                   "\n    -t / -l     show lexer tokens"
+                   "\n    -a          show ast for expression\n";
   fprintf(output_fd, "%s", help_msg);
 }
 
@@ -22,7 +24,7 @@ int main(int argc, char *argv[]) {
 
   int flags = 1;
   int opt;
-  while ((opt = getopt(argc, argv, "hialt")) != -1) {
+  while ((opt = getopt(argc, argv, "hialtp:")) != -1) {
     switch (opt) {
     case 'i':
       start_repl();
@@ -30,6 +32,9 @@ int main(int argc, char *argv[]) {
     case 'h':
       print_cli_help(stdout);
       return 0;
+    case 'p':
+      set_precision(optarg);
+      break;
     case 'a':
       flags |= FLAG_AST;
       break;

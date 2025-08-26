@@ -3,12 +3,10 @@
 #include "arena.h"
 #include "lexer.h"
 
-#define NULL_RETURN(ptr)                                                       \
-  if (ptr == NULL) {                                                           \
-    return NULL                                                                \
-  }
-
 #define INDENT_SIZE 7
+
+int get_precision();
+void set_precision(char *p);
 
 #define BINOP_LIST                                                             \
   X(ADD)                                                                       \

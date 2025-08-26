@@ -5,6 +5,10 @@
 #include "lexer.h"
 #include "parser.h"
 
+int global_precision = 1;
+int get_precision() { return global_precision; }
+void set_precision(char *p) { global_precision = atoi(p); }
+
 const char *binary_operator_name(BinOp o) {
   switch (o) {
 #define X(name)                                                                \
@@ -50,7 +54,7 @@ void _print_expr_helper(ExprArena *expr_arena, int expr_idx, int i) {
   switch (expr->type) {
   case EXPR_NUMERIC: {
     printf("\n%*s", i * INDENT_SIZE, "");
-    printf("Numeric(%lf)", expr->numeric.value);
+    printf("Numeric(%.*lf)", global_precision, expr->numeric.value);
     break;
   }
   case EXPR_UNARY: {

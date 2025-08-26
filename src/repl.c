@@ -89,7 +89,7 @@ int parse_and_eval_expression(char *expr_str, int flags) {
 
   double result = evaluate_expr(expr_arena, expr_idx);
   if ((flags & FLAG_RESULT) == FLAG_RESULT) {
-    printf("%s = %lf\n", expr_str, result);
+    printf("%s = %0.*lf\n", expr_str, get_precision(), result);
   }
 
   token_array_reset(token_array);
