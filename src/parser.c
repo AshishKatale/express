@@ -5,7 +5,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-int global_precision = 1;
+static int global_precision = 1;
 int get_precision() { return global_precision; }
 void set_precision(const char *prec) {
   int p = atoi(prec);
